@@ -8,16 +8,31 @@ import java.util.Comparator;
 import java.util.Locale;
 
 public class Main {
-    private static String baseDirectory = "Meshes\\Actors\\Character\\Animations\\DynamicAnimationReplacer\\_CustomConditions";
-    private static String deleteFolderIfExists = "Meshes\\Actors\\Character\\Animations\\DynamicAnimationReplacer";
-    private static int baseIndex = 4096;
-    private static String femaleFolderName = "female";
-    private static String conditionsFileName = "_conditions.txt";
-    private static String conditionsFileText = "IsFemale() AND\n"
-                    + "IsActorBase(\"Skyrim.esm\" | 0X000007) AND\n"
-                    + "Random(%s)";
-    private static String animationFileName = "mt_idle.hkx";
-    private static String animationFilesDirectory = "."; //replace with folder that contains .hkx files, takes animations in same folder as executable by default
+    private static final String BASE_DIRECTORY = "Meshes\\Actors\\Character\\Animations\\DynamicAnimationReplacer\\_CustomConditions";
+    private static final String DELETE_FOLDER_IF_EXISTS = "Meshes\\Actors\\Character\\Animations\\DynamicAnimationReplacer";
+    private static final int BASE_INDEX = 4096;
+    private static final String FEMALE_FOLDER_NAME = "female";
+    private static final String CONDITIONS_FILE_NAME = "_conditions.txt";
+    private static final String CONDITIONS_PC =
+            "IsFemale() AND\n" +
+            "IsActorBase(\"Skyrim.esm\" | 0X000007) AND\n" +
+            "Random(%s)";
+    private static final String CONDITIONS_PC_NPC_NOELDERS =
+            "IsFemale() AND\n" +
+            "NOT IsVoiceType(\"Skyrim.esm\"|0x00013AE2) AND\n" +
+            "NOT IsVoiceType(\"Skyrim.esm\"|0x00013AE1) AND\n" +
+            "NOT IsVoiceType(\"Skyrim.esm\"|0x00013AD7) AND\n" +
+            "NOT IsVoiceType(\"Skyrim.esm\"|0x00013aD6) AND\n" +
+            "NOT IsRace(\"Skyrim.esm\"|0x00067cd8) AND\n" +
+            "NOT IsChild() AND\n" +
+            "Random(%s)";
+    private static final String CONDITIONS_PC_NPC_WITH_ELDERS =
+            "IsFemale() AND\n" +
+            "NOT IsChild() AND\n" +
+            "Random(%s)";
+    private static final String CONDITIONS = CONDITIONS_PC; //Choose one of the CONDITIONS Strings above
+    private static final String ANIMATION_FILE_NAME = "mt_idle.hkx";
+    private static final String ANIMATION_FILES_DIRECTORY = "."; //replace with folder that contains .hkx files, takes animations in same folder as executable by default
 
     public static void main(String[] args) {
         Logger.deleteLogFileIfExists();
@@ -26,7 +41,7 @@ public class Main {
     }
 
     private static void createBaseDirectory() {
-        Path folderToDelete = Paths.get(deleteFolderIfExists);
+        Path folderToDelete = Paths.get(DELETE_FOLDER_IF_EXISTS);
         if(Files.exists(folderToDelete)) {
             try {
                 Logger.debug("Deleting already existing folders.");
@@ -36,7 +51,7 @@ public class Main {
             }
         }
 
-        Path path = Paths.get(baseDirectory);
+        Path path = Paths.get(BASE_DIRECTORY);
         Logger.debug("Creating Directory " + path.toAbsolutePath());
         try {
             Files.createDirectories(path);
@@ -46,7 +61,7 @@ public class Main {
     }
 
     private static void createAnimationFolders() {
-        File folder = new File(animationFilesDirectory);
+        File folder = new File(ANIMATION_FILES_DIRECTORY);
         File[] listOfFiles = folder.listFiles();
 
         if(listOfFiles == null) {
@@ -58,21 +73,21 @@ public class Main {
             if (listOfFiles[i].isFile() && isHkxFile(listOfFiles[i])) {
                 hkxCount++;
                 Logger.debug("Found hkx file: " + listOfFiles[i].getName());
-                createAnimationFolder(String.valueOf(baseIndex + hkxCount - 1), listOfFiles[i], 1.0/hkxCount);
+                createAnimationFolder(String.valueOf(BASE_INDEX + hkxCount - 1), listOfFiles[i], 1.0/hkxCount);
             }
         }
     }
 
     private static void createAnimationFolder(String folderName, File animationFile, double chance) {
-        Path path = Paths.get(baseDirectory + "\\" + folderName + "\\" + femaleFolderName);
-        Path targetFilePath = Paths.get(baseDirectory + "\\" + folderName + "\\" + femaleFolderName + "\\" + animationFileName);
+        Path path = Paths.get(BASE_DIRECTORY + "\\" + folderName + "\\" + FEMALE_FOLDER_NAME);
+        Path targetFilePath = Paths.get(BASE_DIRECTORY + "\\" + folderName + "\\" + FEMALE_FOLDER_NAME + "\\" + ANIMATION_FILE_NAME);
         try {
             Logger.debug("Creating folder " + path.toAbsolutePath());
             Files.createDirectories(path);
             Logger.debug("Copying animation file " + animationFile.toPath().toAbsolutePath() + " to " + targetFilePath.toAbsolutePath());
             String msg = "Copying animation file " + animationFile.toPath().toAbsolutePath() + " to " + targetFilePath.toAbsolutePath();
             Files.copy(animationFile.toPath(), targetFilePath);
-            createConditionsFile(baseDirectory + "\\" + folderName, chance);
+            createConditionsFile(BASE_DIRECTORY + "\\" + folderName, chance);
         } catch (IOException e) {
             throw new CustomRuntimeException("Could not create Animation Folder " + path.toAbsolutePath(), e);
         }
@@ -80,14 +95,14 @@ public class Main {
 
     private static void createConditionsFile(String path, double chance) {
         try {
-            Logger.debug("Creating conditions file " + path + "\\" + conditionsFileName);
-            FileOutputStream file = new FileOutputStream(path + "\\" + conditionsFileName);
+            Logger.debug("Creating conditions file " + path + "\\" + CONDITIONS_FILE_NAME);
+            FileOutputStream file = new FileOutputStream(path + "\\" + CONDITIONS_FILE_NAME);
             BufferedOutputStream bufferedWriter = new BufferedOutputStream(file);
             Logger.debug("Using chance " + trimNumber(chance));
             bufferedWriter.write(getConditionsText(chance).getBytes());
             bufferedWriter.close();
         } catch (IOException e) {
-            throw new CustomRuntimeException("Could not create Animation Conditions File " + path + conditionsFileName, e);
+            throw new CustomRuntimeException("Could not create Animation Conditions File " + path + CONDITIONS_FILE_NAME, e);
         }
     }
 
@@ -105,7 +120,7 @@ public class Main {
     }
 
     private static String getConditionsText(double chance) {
-        return String.format(conditionsFileText, trimNumber(chance));
+        return String.format(CONDITIONS, trimNumber(chance));
     }
 
     private static String trimNumber(double number) {
