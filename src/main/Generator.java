@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class FileBuilder {
+public class Generator implements Runnable {
     private static final String BASE_DIRECTORY = "Meshes\\Actors\\Character\\Animations\\DynamicAnimationReplacer\\_CustomConditions";
     private static final int BASE_INDEX = 4096;
     private static final String FEMALE_FOLDER_NAME = "female";
@@ -27,7 +27,7 @@ public class FileBuilder {
             "IsFemale() AND\n" +
                     "IsActorBase(\"Skyrim.esm\" | 0X000007) AND\n" +
                     "Random(%s)";
-    private static final String CONDITIONS_PC_NPC_NOELDERS =
+    private static final String CONDITIONS_PC_NPC =
             "IsFemale() AND\n" +
                     "NOT IsVoiceType(\"Skyrim.esm\"|0x00013AE2) AND\n" +
                     "NOT IsVoiceType(\"Skyrim.esm\"|0x00013AE1) AND\n" +
@@ -36,20 +36,38 @@ public class FileBuilder {
                     "NOT IsRace(\"Skyrim.esm\"|0x00067cd8) AND\n" +
                     "NOT IsChild() AND\n" +
                     "Random(%s)";
-    private static final String CONDITIONS_PC_NPC_WITH_ELDERS =
+    private static final String CONDITIONS_PC_NPC_ELDERS =
             "IsFemale() AND\n" +
                     "NOT IsChild() AND\n" +
                     "Random(%s)";
-    private static final String CONDITIONS = CONDITIONS_PC_NPC_WITH_ELDERS; //Choose one of the CONDITIONS Strings above
     private static final String ANIMATION_FILE_NAME = "mt_idle.hkx";
     private static final String ANIMATION_FILES_DIRECTORY = "."; //replace with folder that contains .hkx files, takes animations in same folder as executable by default
 
     private static final Logger logger = Main.logger;
 
-    public FileBuilder() {
+    private final ConditionType conditionType;
+    private final String CONDITIONS; //Choose one of the CONDITIONS Strings above
+
+    public Generator(ConditionType conditionType) {
+        this.conditionType = conditionType;
+        switch (conditionType) {
+            case PC:
+                CONDITIONS = CONDITIONS_PC;
+                break;
+            case PC_NPC:
+                CONDITIONS = CONDITIONS_PC_NPC;
+                break;
+            case PC_NPC_ELDERS:
+                CONDITIONS = CONDITIONS_PC_NPC_ELDERS;
+                break;
+            default:
+                throw new CustomRuntimeException("Condition Type " + conditionType + " unknown");
+        }
+        logger.info("SET CONDITION TYPE AS " + this.conditionType);
     }
 
-    public void build() {
+    @Override
+    public void run() {
         createBaseDirectory();
         createAnimationFolders();
     }

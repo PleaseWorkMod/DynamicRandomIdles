@@ -8,11 +8,8 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 public class LoggerBuilder {
-    private static final String LOG_FILE_NAME = "DynamicRandomIdlesLog.txt";
+    private static final String LOG_FILE_NAME = "Generator.log";
     private static final String FIRST_LINE = "DYNAMIC RANDOM IDLES LOG FILE " +  LOG_FILE_NAME;
-
-    public LoggerBuilder() {
-    }
 
     public Logger build() {
         Logger logger = Logger.getLogger(LOG_FILE_NAME);
