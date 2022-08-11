@@ -90,7 +90,7 @@ public class Conditions {
                 .stream(relativeOrigin.spliterator(), false)
                 .map(Path::toString)
                 .toArray(String[]::new);
-        String originFile = String.join(".", originArray);
+        String originFile = String.join(".", originArray) + ".#";
         Path path = Paths.get(CONDITIONS_DIRECTORY, conditionFolder, originFile);
         try {
             logger.info("Creating identification file " + path.toAbsolutePath());
