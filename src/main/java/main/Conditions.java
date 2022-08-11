@@ -56,7 +56,7 @@ public class Conditions {
             if(file.isFile()) {
                 FileUtils.copyFile(file, targetFilePath.toFile());
             } else {
-                FileUtils.copyDirectory(file, targetFilePath.toFile());
+                throw new CustomIOException("Cannot copy a directory");
             }
         } catch (IOException e) {
             throw new CustomIOException("Could not copy animation file to " + targetFilePath.toAbsolutePath(), e);

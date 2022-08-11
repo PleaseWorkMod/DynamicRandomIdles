@@ -57,7 +57,7 @@ public class Generator implements Runnable {
     private void iterateLooseAnimations(File[] animations, Config config) {
         for (File animation : animations) {
             if(animation.isFile() && isHkxFile(animation)) {
-                logger.info("Found loose animation within set: " + animation.getName());
+                logger.info("Found loose animation file " + animation.getName() + " within set");
                 config.getConditions().generateNextCondition();
                 config.getConditions().copyToCondition(animation, config.getTargetFileName());
             }
@@ -67,19 +67,25 @@ public class Generator implements Runnable {
     private void iteratePacks(File[] packs, Config config) {
         for (File pack : packs) {
             if(pack.isDirectory()) {
-                logger.info("Found pack within set: " + pack.getName());
+                logger.info("Found pack " + pack.getName() + " within set");
                 config.getConditions().generateNextCondition();
-                File[] animations = getFileList(pack);
-                iteratePackAnimations(animations, config);
+                File[] files = getFileList(pack);
+                iteratePackFiles(files, config, pack);
             }
         }
     }
 
-    private void iteratePackAnimations(File[] animations, Config config) {
-        for (File animation : animations) {
-            if (animation.isFile() && isHkxFile(animation)) {
-                logger.info("Found animation file within pack: " + animation.getName());
-                config.getConditions().copyToCondition(animation, animation.getName());
+    private void iteratePackFiles(File[] files, Config config, File topPack) {
+        for (File file : files) {
+            if(file.isDirectory()) {
+                logger.info("Found folder " + file.getName() + " within pack");
+                files = getFileList(file);
+                iteratePackFiles(files, config, topPack);
+            }
+            if (file.isFile() && isHkxFile(file)) {
+                logger.info("Found animation file " + file.getName() + " within pack");
+                Path relativePath = topPack.toPath().relativize(file.toPath());
+                config.getConditions().copyToCondition(file, relativePath.toString());
             }
         }
     }
