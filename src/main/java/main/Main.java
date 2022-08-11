@@ -21,7 +21,7 @@ public class Main {
             //logger exception cannot be logged, so also rethrow it
             throw e;
         } catch (RuntimeException e) {
-            throw new LoggedException("Caught unhandled exception", e);
+            throw new LoggedException("Caught unlogged exception", e);
         }
     }
 }

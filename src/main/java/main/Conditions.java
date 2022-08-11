@@ -13,16 +13,20 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Arrays;
 import java.util.IllegalFormatException;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
+import java.util.stream.StreamSupport;
 
 public class Conditions {
     private static final String CONDITIONS_DIRECTORY = Main.CONDITIONS_DIRECTORY;
     private static final String CONDITIONS_FILE_NAME = Main.CONDITIONS_FILE_NAME;
+    private static final String SETS_DIRECTORY = Main.SETS_DIRECTORY;
     private static final Logger logger = Main.logger;
 
-    private File set;
+    private final File set;
     private String condition;
     private Integer conditionBaseIndex;
     private Integer indexOffset;
@@ -63,10 +67,11 @@ public class Conditions {
         }
     }
 
-    public void generateNextCondition() {
+    public void generateNextCondition(File origin) {
         indexOffset++;
         createConditionFolder(getConditionFolder());
         createConditionFile(getConditionFolder(), getChance());
+        createOriginFile(getConditionFolder(), origin);
     }
 
     private void createConditionFolder(String conditionFolder) {
@@ -74,6 +79,22 @@ public class Conditions {
         try {
             logger.info("Creating directory " + path.toAbsolutePath());
             Files.createDirectories(path);
+        } catch (IOException e) {
+            throw new CustomIOException("Could not create condition Folder " + path.toAbsolutePath(), e);
+        }
+    }
+
+    private void createOriginFile(String conditionFolder, File origin) {
+        Path relativeOrigin = Paths.get(SETS_DIRECTORY).relativize(origin.toPath());
+        String[] originArray = StreamSupport
+                .stream(relativeOrigin.spliterator(), false)
+                .map(Path::toString)
+                .toArray(String[]::new);
+        String originFile = String.join(".", originArray);
+        Path path = Paths.get(CONDITIONS_DIRECTORY, conditionFolder, originFile);
+        try {
+            logger.info("Creating identification file " + path.toAbsolutePath());
+            Files.createFile(path);
         } catch (IOException e) {
             throw new CustomIOException("Could not create condition Folder " + path.toAbsolutePath(), e);
         }

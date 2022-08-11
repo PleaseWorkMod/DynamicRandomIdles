@@ -58,7 +58,7 @@ public class Generator implements Runnable {
         for (File animation : animations) {
             if(animation.isFile() && isHkxFile(animation)) {
                 logger.info("Found loose animation file " + animation.getName() + " within set");
-                config.getConditions().generateNextCondition();
+                config.getConditions().generateNextCondition(animation);
                 config.getConditions().copyToCondition(animation, config.getTargetFileName());
             }
         }
@@ -68,7 +68,7 @@ public class Generator implements Runnable {
         for (File pack : packs) {
             if(pack.isDirectory()) {
                 logger.info("Found pack " + pack.getName() + " within set");
-                config.getConditions().generateNextCondition();
+                config.getConditions().generateNextCondition(pack);
                 File[] files = getFileList(pack);
                 iteratePackFiles(files, config, pack);
             }

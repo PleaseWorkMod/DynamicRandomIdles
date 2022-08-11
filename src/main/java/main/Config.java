@@ -17,7 +17,7 @@ public class Config {
     private static final Logger logger = Main.logger;
 
 
-    private File set;
+    private final File set;
     private boolean looseFiles;
     private String targetFileName;
     private final Conditions conditions;
