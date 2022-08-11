@@ -1,0 +1,18 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+}
+
+test {
+    useJUnitPlatform()
+}
