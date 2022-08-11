@@ -93,10 +93,10 @@ public class Conditions {
         String originFile = String.join(".", originArray) + ".#";
         Path path = Paths.get(CONDITIONS_DIRECTORY, conditionFolder, originFile);
         try {
-            logger.info("Creating identification file " + path.toAbsolutePath());
+            logger.info("Creating origin file " + path.toAbsolutePath());
             Files.createFile(path);
         } catch (IOException e) {
-            throw new CustomIOException("Could not create condition Folder " + path.toAbsolutePath(), e);
+            throw new CustomIOException("Could not create origin file " + path.toAbsolutePath(), e);
         }
     }
 
